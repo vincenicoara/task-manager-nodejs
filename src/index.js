@@ -43,6 +43,32 @@ app.get('/users/:id', async (req, res) => {
     }
 })
 
+app.patch('/users/:id', async (req, res) => {
+    const updates = Object.keys(req.body)
+    console.log(updates)
+    const allowedUpdates = ['name', 'password', 'email', 'age']
+    const isValid = updates.filter((val) => {
+        return !allowedUpdates.includes(val) 
+    }).length == 0
+
+    if(!isValid) {
+        return res.status(400).send({error: 'Invalid updates'})
+    }
+    console.log('isValid', isValid)
+
+    const id = req.params.id
+    try {
+        const user = await User.findByIdAndUpdate(id, req.body, {new: true, runValidators: true})
+        
+        if (!user){
+            return res.status(404).send()
+        }
+        res.send(user)
+    } catch (err) {
+        res.status(400)
+    }
+})
+
 app.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
     try {
@@ -72,6 +98,54 @@ app.get('/tasks/:id', async (req, res) => {
         res.send(task)
     } catch (err) {
         res.status(500).send(err)
+    }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    const id = req.params.id
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ['description', 'completed']
+    const isValid = updates.filter((val) => {
+        return !allowedUpdates.includes(val) 
+    }).length == 0
+
+    if(!isValid) {
+        return res.status(400).send({error: 'Invalid updates'})
+    }
+    try {
+        const user = await Task.findByIdAndUpdate(id, req.body, {new: true, runValidators: true})
+        res.send(user)
+    } catch (err) {
+        res.status(400)
+    }
+
+} )
+
+app.delete('/tasks/:id', async (req, res) => {
+    const id = req.params.id
+    try {
+        const task = await Task.findByIdAndDelete(id)
+        console.log(task)
+        if (!task){
+            return res.status(404).send()
+        }
+        res.send(task)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send()
+    }
+})
+
+app.delete('/users/:id', async (req, res) => {
+    const id = req.params.id
+    try {
+        const user = await User.findByIdAndDelete(id) 
+        if (!user){ 
+            return res.status(404).send()
+        }
+        res.send(user)
+    } catch (err) {
+        res.status(500).send()
     }
 })
 
