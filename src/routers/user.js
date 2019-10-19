@@ -5,6 +5,7 @@ const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
 const sharp = require('sharp')
+const {sendWelcomeEmail, sendCancelationEmail} = require('../emails/account')
 
 
 router.post('/users', async (req, res) => {
@@ -21,6 +22,7 @@ router.post('/users/signup', async (req, res) => {
     const user = new User(req.body)
     try {
         await user.save()
+        sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         res.send({user, token})
     } catch (err) {
@@ -91,6 +93,7 @@ router.delete('/users/me', auth, async (req, res) => {
     try {
         const user = req.user
         await user.remove()
+        sendCancelationEmail(user.email, user.name)
         res.send(req.user)
     } catch (err) {
         res.status(500).send()
