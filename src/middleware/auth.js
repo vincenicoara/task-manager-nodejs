@@ -2,10 +2,9 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 
 const auth = async (req, res, next) => {
-    console.log('auth')
     const bearerToken = req.get('Authorization')
     if (!bearerToken){
-        return res.send(404).send('Not authenticated for this action')
+        return res.status(401).send('Not authenticated for this action')
     }
     try {
         const token = bearerToken.replace('Bearer ', '')
